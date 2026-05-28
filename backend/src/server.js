@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import apiRoutes from './routes/api.js';
@@ -12,6 +13,9 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
+const frontendIndexPath = path.join(frontendDistPath, 'index.html');
+const serveFrontend =
+  NODE_ENV === 'production' && fs.existsSync(frontendIndexPath);
 
 app.use(
   cors({
@@ -25,11 +29,15 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
 
-if (NODE_ENV === 'production') {
+if (serveFrontend) {
   app.use(express.static(frontendDistPath));
   app.get('*', (req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(frontendDistPath, 'index.html'));
+    res.sendFile(frontendIndexPath);
+  });
+} else {
+  app.get('/', (_req, res) => {
+    res.json({ status: 'ok', message: 'PDF Measurement Extractor API' });
   });
 }
 
