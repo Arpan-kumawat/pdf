@@ -6,6 +6,7 @@ import apiRoutes from './routes/api.js';
 
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -14,7 +15,7 @@ const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 
 app.use(
   cors({
-    origin: NODE_ENV === 'production' ? false : true,
+    origin: NODE_ENV === 'production' ? FRONTEND_ORIGIN : true,
   })
 );
 app.use(express.json({ limit: '10mb' }));
